@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.inbox.mapper.MessageInboxMapper">
+
+    <resultMap id="InboxResult" type="com.scaffold.module.inbox.domain.MessageInboxEntry">
+        <id property="id" column="id"/>
+        <result property="messageId" column="message_id"/>
+        <result property="scope" column="scope"/>
+        <result property="target" column="target"/>
+        <result property="type" column="type"/>
+        <result property="payload" column="payload"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="readAt" column="read_at"/>
+        <result property="expireAt" column="expire_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.scaffold.module.inbox.domain.MessageInboxEntry">
+        INSERT IGNORE INTO sys_message_inbox
+            (message_id, scope, target, type, payload, status, created_at, expire_at)
+        VALUES
+            (#{messageId}, #{scope}, #{target}, #{type}, #{payload}, COALESCE(#{status}, 0),
+             COALESCE(#{createdAt}, NOW()), #{expireAt})
+    </insert>
+
+    <select id="selectUnreadByUser" resultMap="InboxResult">
+        SELECT id, message_id, scope, target, type, payload, status, created_at, read_at, expire_at
+        FROM sys_message_inbox
+        WHERE scope = 'USER'
+          AND target = #{username}
+          AND status = 0
+        ORDER BY id ASC
+        LIMIT #{limit}
+    </select>
+
+    <update id="markRead">
+        UPDATE sys_message_inbox
+        SET status = 1, read_at = NOW()
+        WHERE id = #{id}
+          AND scope = 'USER'
+          AND target = #{username}
+          AND status = 0
+    </update>
+
+    <update id="markAllReadByUser">
+        UPDATE sys_message_inbox
+        SET status = 1, read_at = NOW()
+        WHERE scope = 'USER'
+          AND target = #{username}
+          AND status = 0
+    </update>
+
+    <select id="countUnreadByUser" resultType="int">
+        SELECT COUNT(*) FROM sys_message_inbox
+        WHERE scope = 'USER' AND target = #{username} AND status = 0
+    </select>
+
+    <update id="expireBeforeNow">
+        UPDATE sys_message_inbox
+        SET status = 2
+        WHERE status = 0
+          AND expire_at IS NOT NULL
+          AND expire_at &lt; NOW()
+    </update>
+
+    <delete id="deleteExpired">
+        DELETE FROM sys_message_inbox
+        WHERE status IN (1, 2)
+          AND created_at &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+    <sql id="pageWhere">
+        scope = 'USER'
+        AND target = #{username}
+        <choose>
+            <when test="statuses != null and !statuses.isEmpty()">
+                AND status IN
+                <foreach collection="statuses" item="s" open="(" separator="," close=")">#{s}</foreach>
+            </when>
+            <otherwise>
+                AND status IN (0, 1)
+            </otherwise>
+        </choose>
+        <if test="typeKeyword != null and typeKeyword != ''">
+            AND type LIKE CONCAT('%', #{typeKeyword}, '%')
+        </if>
+        <if test="fromTime != null">
+            AND created_at &gt;= #{fromTime}
+        </if>
+        <if test="toTime != null">
+            AND created_at &lt;= #{toTime}
+        </if>
+    </sql>
+
+    <select id="selectPageByUser" resultMap="InboxResult">
+        SELECT id, message_id, scope, target, type, payload, status, created_at, read_at, expire_at
+        FROM sys_message_inbox
+        WHERE
+        <include refid="pageWhere"/>
+        ORDER BY created_at DESC, id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countPageByUser" resultType="int">
+        SELECT COUNT(*) FROM sys_message_inbox
+        WHERE
+        <include refid="pageWhere"/>
+    </select>
+
+    <update id="markBatchReadByIds">
+        UPDATE sys_message_inbox
+        SET status = 1, read_at = NOW()
+        WHERE scope = 'USER'
+          AND target = #{username}
+          AND status = 0
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <delete id="deleteBatchByIds">
+        DELETE FROM sys_message_inbox
+        WHERE scope = 'USER'
+          AND target = #{username}
+          AND id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </delete>
+
+    <delete id="deleteByIdAndUser">
+        DELETE FROM sys_message_inbox
+        WHERE id = #{id}
+          AND scope = 'USER'
+          AND target = #{username}
+    </delete>
+
+</mapper>

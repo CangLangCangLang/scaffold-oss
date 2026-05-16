@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.framework.observability.mapper.SlowRequestMapper">
+
+    <resultMap id="SlowRequestResult" type="com.scaffold.framework.observability.domain.SlowRequest">
+        <id property="id" column="id"/>
+        <result property="requestUri"   column="request_uri"/>
+        <result property="method"       column="method"/>
+        <result property="status"       column="status"/>
+        <result property="costMs"       column="cost_ms"/>
+        <result property="traceId"      column="trace_id"/>
+        <result property="username"     column="username"/>
+        <result property="clientIp"     column="client_ip"/>
+        <result property="reason"       column="reason"/>
+        <result property="exceptionMsg" column="exception_msg"/>
+        <result property="alerted"      column="alerted"/>
+        <result property="createTime"   column="create_time"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, request_uri, method, status, cost_ms, trace_id, username, client_ip,
+        reason, exception_msg, alerted, create_time
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.scaffold.framework.observability.domain.SlowRequest">
+        INSERT INTO sys_slow_request
+            (request_uri, method, status, cost_ms, trace_id, username, client_ip,
+             reason, exception_msg, alerted, create_time)
+        VALUES
+            (#{requestUri}, #{method}, #{status}, #{costMs}, #{traceId}, #{username}, #{clientIp},
+             #{reason}, #{exceptionMsg}, COALESCE(#{alerted}, '0'), COALESCE(#{createTime}, NOW()))
+    </insert>
+
+    <select id="selectPendingAlerts" resultMap="SlowRequestResult">
+        SELECT <include refid="cols"/> FROM sys_slow_request
+        WHERE alerted = '0' AND create_time &gt;= #{since}
+        ORDER BY create_time ASC, id ASC
+    </select>
+
+    <update id="markAlerted">
+        UPDATE sys_slow_request
+        SET alerted = '1'
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </update>
+
+    <select id="selectList" resultMap="SlowRequestResult">
+        SELECT <include refid="cols"/> FROM sys_slow_request
+        <where>
+            <if test="reason != null and reason != ''">AND reason = #{reason}</if>
+            <if test="requestUri != null and requestUri != ''">AND request_uri LIKE CONCAT('%', #{requestUri}, '%')</if>
+            <if test="beginTime != null">AND create_time &gt;= #{beginTime}</if>
+            <if test="endTime != null">AND create_time &lt;= #{endTime}</if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <delete id="deleteOlderThan">
+        DELETE FROM sys_slow_request
+        WHERE create_time &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+    <delete id="deleteById">
+        DELETE FROM sys_slow_request WHERE id = #{id}
+    </delete>
+
+    <select id="countPending" resultType="long">
+        SELECT COUNT(*) FROM sys_slow_request WHERE alerted = '0'
+    </select>
+
+</mapper>

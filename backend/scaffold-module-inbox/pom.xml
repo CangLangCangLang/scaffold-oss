@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold</artifactId>
+        <groupId>com.scaffold</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>scaffold-module-inbox</artifactId>
+    <description>
+        离线消息盒模块（与 WebSocket 推送总线协同），可插拔；删除整个模块目录与 admin 中对它的依赖即下线。
+    </description>
+
+    <dependencies>
+        <!-- 复用框架核心：MessagePublisher / PushMessage / SecurityUtils 等 -->
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-framework</artifactId>
+        </dependency>
+
+        <!--
+            Swagger / OpenAPI 注解（@Tag / @Operation / @Parameter / @Schema）。
+            版本由父 pom dependencyManagement 管理（与 SpringDoc 拉的版本对齐）。
+            只在 controller / DTO 上做标注用；不引入完整 SpringDoc UI（后者由 scaffold-admin 提供）。
+        -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold</artifactId>
+        <groupId>com.scaffold</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>scaffold-module-workflow</artifactId>
+    <description>
+        工作流模块（基于 Flowable 8 / BPMN 2.0），可插拔；
+        删除整个模块目录与 admin 中对它的依赖即下线，Liquibase 主流程不受影响。
+        Flowable 引擎自身的 ACT_* 表由 starter 在启动时按需建好（同一 DataSource）。
+    </description>
+
+    <dependencies>
+        <!-- 复用框架核心：MessagePublisher / SecurityUtils / ScaffoldModule 等 -->
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-framework</artifactId>
+        </dependency>
+
+        <!-- Flowable BPMN 流程引擎（不带 CMMN/DMN/App）：少建表、轻量化 -->
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter-process</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

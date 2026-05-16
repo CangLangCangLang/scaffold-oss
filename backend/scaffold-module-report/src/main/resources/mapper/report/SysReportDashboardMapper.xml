@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.report.mapper.SysReportDashboardMapper">
+
+    <resultMap id="dashMap" type="com.scaffold.module.report.domain.SysReportDashboard">
+        <id     column="id"           property="id"/>
+        <result column="code"         property="code"/>
+        <result column="name"         property="name"/>
+        <result column="category"     property="category"/>
+        <result column="layout_json"  property="layoutJson"/>
+        <result column="perm_key"     property="permKey"/>
+        <result column="status"       property="status"/>
+        <result column="remark"       property="remark"/>
+        <result column="create_by"    property="createBy"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="update_by"    property="updateBy"/>
+        <result column="update_time"  property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, code, name, category, layout_json, perm_key, status, remark,
+        create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectPage" resultMap="dashMap">
+        SELECT <include refid="cols"/>
+        FROM sys_report_dashboard
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="category != null and category != ''">AND category = #{category}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_report_dashboard
+        <where>
+            <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+            <if test="category != null and category != ''">AND category = #{category}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+    </select>
+
+    <select id="selectById" resultMap="dashMap">
+        SELECT <include refid="cols"/> FROM sys_report_dashboard WHERE id = #{id}
+    </select>
+
+    <select id="selectByCode" resultMap="dashMap">
+        SELECT <include refid="cols"/> FROM sys_report_dashboard WHERE code = #{code}
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.report.domain.SysReportDashboard"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_report_dashboard
+        (code, name, category, layout_json, perm_key, status, remark, create_by, create_time)
+        VALUES
+        (#{code}, #{name}, #{category}, #{layoutJson}, #{permKey}, #{status},
+         #{remark}, #{createBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.report.domain.SysReportDashboard">
+        UPDATE sys_report_dashboard
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="layoutJson != null">layout_json = #{layoutJson},</if>
+            <if test="permKey != null">perm_key = #{permKey},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_report_dashboard WHERE id = #{id}
+    </delete>
+
+</mapper>

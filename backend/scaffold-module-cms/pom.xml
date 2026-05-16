@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold</artifactId>
+        <groupId>com.scaffold</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>scaffold-module-cms</artifactId>
+    <description>
+        CMS 内容管理模块（栏目 / 文章 / 标签 / 状态机 / 公开 API），可插拔。
+        删除整个模块目录与 admin 中对它的依赖即下线，Liquibase 主流程不受影响。
+        富文本正文以 HTML 形式落库（content_html），由前端 wangEditor 输出。
+    </description>
+
+    <dependencies>
+        <!-- 复用框架核心：BaseController / @AuditLog / SecurityUtils / ScaffoldModule 等 -->
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-framework</artifactId>
+        </dependency>
+
+        <!--
+            Swagger / OpenAPI 注解（@Tag / @Operation / @Parameter）。
+            版本由父 pom dependencyManagement 管理（与 SpringDoc 3.0.2 拉的版本对齐）。
+            只在 controller 上做标注用；不引入完整 SpringDoc UI（后者由 scaffold-admin 提供）。
+        -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

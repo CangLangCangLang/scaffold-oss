@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold</artifactId>
+        <groupId>com.scaffold</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>scaffold-module-file</artifactId>
+    <description>
+        文件中心模块（M-6）：sys_file 主表 + 文件夹（树）+ 分享链接（带过期 / 一次性 token）+ 引用计数。
+        上传走 framework 通用 UploadStorageService（可本地磁盘 / S3）；下载走鉴权代理 /file/download/{id}；
+        删除采用两阶段 — 软删 30 天 → quartz 定时任务清磁盘。删除整个目录与 admin 中的依赖即下线，对其它模块零影响。
+    </description>
+
+    <dependencies>
+        <!-- 框架核心：BaseController / @AuditLog / SecurityUtils / ScaffoldModule / UploadStorageService -->
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-framework</artifactId>
+        </dependency>
+
+        <!-- Swagger / OpenAPI 注解（@Tag / @Operation / @Parameter / @Schema） -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -1,0 +1,27 @@
+# 测试 profile：禁用外部依赖（Druid/Liquibase/Redis 自动配置），用于纯单元测试上下文。
+spring:
+  liquibase:
+    enabled: false
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  profiles:
+    active: test
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+token:
+  header: Authorization
+  secret: test-secret-test-secret-test-secret-test-secret-test-secret-tests
+  expireTime: 30
+
+scaffold:
+  name: scaffold-test
+  version: test
+  copyrightYear: 2026
+  profile: ./build/uploadPath
+  addressEnabled: false
+  captchaType: math

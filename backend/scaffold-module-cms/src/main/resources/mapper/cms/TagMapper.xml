@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.cms.mapper.TagMapper">
+
+    <resultMap id="tagMap" type="com.scaffold.module.cms.domain.Tag">
+        <id     column="id"          property="id"/>
+        <result column="name"        property="name"/>
+        <result column="color"       property="color"/>
+        <result column="create_by"   property="createBy"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="cols">id, name, color, create_by, create_time</sql>
+
+    <select id="selectList" resultMap="tagMap">
+        SELECT <include refid="cols"/>
+        FROM cms_tag
+        <where>
+            <if test="name != null and name != ''">name LIKE CONCAT('%', #{name}, '%')</if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="tagMap">
+        SELECT <include refid="cols"/> FROM cms_tag WHERE id = #{id}
+    </select>
+
+    <select id="selectByName" parameterType="string" resultMap="tagMap">
+        SELECT <include refid="cols"/> FROM cms_tag WHERE name = #{name}
+    </select>
+
+    <select id="selectByIds" resultMap="tagMap">
+        SELECT <include refid="cols"/> FROM cms_tag
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.cms.domain.Tag" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cms_tag (name, color, create_by, create_time)
+        VALUES (#{name}, #{color}, #{createBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.cms.domain.Tag">
+        UPDATE cms_tag
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="color != null">color = #{color},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM cms_tag WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteArticleTagByTagId" parameterType="long">
+        DELETE FROM cms_article_tag WHERE tag_id = #{tagId}
+    </delete>
+
+    <select id="countArticleByTagId" parameterType="long" resultType="int">
+        SELECT COUNT(1) FROM cms_article_tag WHERE tag_id = #{tagId}
+    </select>
+
+</mapper>

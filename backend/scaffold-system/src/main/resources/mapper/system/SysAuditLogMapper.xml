@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.system.mapper.SysAuditLogMapper">
+
+    <resultMap id="AuditResult" type="com.scaffold.system.domain.SysAuditLog">
+        <id property="id" column="id"/>
+        <result property="traceId" column="trace_id"/>
+        <result property="module" column="module"/>
+        <result property="action" column="action"/>
+        <result property="resourceType" column="resource_type"/>
+        <result property="resourceId" column="resource_id"/>
+        <result property="actor" column="actor"/>
+        <result property="actorId" column="actor_id"/>
+        <result property="actorDeptId" column="actor_dept_id"/>
+        <result property="actorDept" column="actor_dept"/>
+        <result property="clientIp" column="client_ip"/>
+        <result property="requestUri" column="request_uri"/>
+        <result property="beforeValue" column="before_value"/>
+        <result property="afterValue" column="after_value"/>
+        <result property="diff" column="diff_value"/>
+        <result property="status" column="status"/>
+        <result property="errorMessage" column="error_message"/>
+        <result property="comment" column="comment"/>
+        <result property="costMs" column="cost_ms"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.scaffold.system.domain.SysAuditLog">
+        INSERT INTO sys_audit_log
+            (trace_id, module, action, resource_type, resource_id,
+             actor, actor_id, actor_dept_id, actor_dept, client_ip, request_uri,
+             before_value, after_value, diff_value, status, error_message,
+             comment, cost_ms, created_at)
+        VALUES
+            (#{traceId}, #{module}, #{action}, #{resourceType}, #{resourceId},
+             #{actor}, #{actorId}, #{actorDeptId}, #{actorDept}, #{clientIp}, #{requestUri},
+             #{beforeValue}, #{afterValue}, #{diff}, COALESCE(#{status}, 0), #{errorMessage},
+             #{comment}, #{costMs}, COALESCE(#{createdAt}, NOW()))
+    </insert>
+
+    <select id="selectById" resultMap="AuditResult">
+        SELECT * FROM sys_audit_log WHERE id = #{id}
+    </select>
+
+    <!--
+        数据级权限示例：
+        - 第一参数为 SysAuditLog（继承 BaseEntity）→ DataScopeAspect 把生成的 SQL 写入 params.dataScope
+        - 这里用 ${params.dataScope} 占位拼接，并通过 LEFT JOIN 暴露 d.dept_id / u.user_id 别名
+        - 别名与 controller 上的 @DataScope(deptAlias="d", userAlias="u") 严格一致
+    -->
+    <select id="selectList" parameterType="com.scaffold.system.domain.SysAuditLog" resultMap="AuditResult">
+        SELECT a.*
+        FROM sys_audit_log a
+        LEFT JOIN sys_dept d ON d.dept_id = a.actor_dept_id
+        LEFT JOIN sys_user u ON u.user_id = a.actor_id
+        <where>
+            <if test="module != null and module != ''"> AND a.module = #{module} </if>
+            <if test="action != null and action != ''"> AND a.action = #{action} </if>
+            <if test="resourceType != null and resourceType != ''"> AND a.resource_type = #{resourceType} </if>
+            <if test="resourceId != null and resourceId != ''"> AND a.resource_id = #{resourceId} </if>
+            <if test="actor != null and actor != ''"> AND a.actor LIKE CONCAT('%', #{actor}, '%') </if>
+            <if test="status != null"> AND a.status = #{status} </if>
+            <if test="fromTime != null"> AND a.created_at &gt;= #{fromTime} </if>
+            <if test="toTime != null"> AND a.created_at &lt; #{toTime} </if>
+            <!-- 数据级权限过滤：DataScopeAspect 注入 -->
+            ${params.dataScope}
+        </where>
+        ORDER BY a.id DESC
+    </select>
+
+    <select id="countOlderThan" resultType="long">
+        SELECT COUNT(*) FROM sys_audit_log
+        WHERE created_at &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </select>
+
+    <delete id="deleteOlderThan">
+        DELETE FROM sys_audit_log
+        WHERE created_at &lt; DATE_SUB(NOW(), INTERVAL #{days} DAY)
+    </delete>
+
+</mapper>

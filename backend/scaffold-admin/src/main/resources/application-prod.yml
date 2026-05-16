@@ -1,0 +1,27 @@
+spring:
+  devtools:
+    restart:
+      enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+token:
+  secret: ${JWT_SECRET}
+
+logging:
+  level:
+    com.scaffold: info
+    org.springframework: warn
+
+referer:
+  enabled: true
+
+server:
+  tomcat:
+    threads:
+      max: ${TOMCAT_MAX_THREADS:200}
+      min-spare: ${TOMCAT_MIN_SPARE_THREADS:20}

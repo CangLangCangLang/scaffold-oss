@@ -1,0 +1,180 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260320-scaffold-baseline
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: sys_user
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/scaffold_20260320.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260320-quartz-tables
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: QRTZ_JOB_DETAILS
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/quartz.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260505-sso-external-identity
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: sys_user_external_identity
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sso_external_identity.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260506-sys-audit-log
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: sys_audit_log
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sys_audit_log.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260506-sys-audit-log-dept-id
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: |
+              SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE table_schema = DATABASE()
+                AND table_name = 'sys_audit_log'
+                AND column_name = 'actor_dept_id'
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sys_audit_log_dept_id.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260506-sys-audit-log-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: |
+              SELECT COUNT(*) FROM sys_menu WHERE menu_id = 502
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sys_audit_log_menu.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260506-sys-audit-log-dept-id-backfill
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - and:
+            - tableExists:
+                tableName: sys_audit_log
+            - tableExists:
+                tableName: sys_user
+            - sqlCheck:
+                expectedResult: 1
+                sql: |
+                  SELECT IF(COUNT(*) > 0, 1, 0) FROM sys_audit_log
+                  WHERE actor_dept_id IS NULL AND actor IS NOT NULL
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sys_audit_log_dept_id_backfill.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  # ============== Q-3 可观测性 ==============
+  - changeSet:
+      id: 20260510-sys-slow-request
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: sys_slow_request
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sys_observability.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: 20260510-sys-observability-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM sys_menu WHERE menu_id = 9001
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/sys_observability_menu.sql
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  # ============== 可插拔业务模块 changelog ==============
+  # 约定：每个业务模块把自己的 changelog 文件打包到自己 jar 的 db/changelog/module-<name>.yml。
+  # 删除模块 jar 时本 include 会找不到文件 → 通过 errorIfMissingOrEmpty=false 跳过；
+  # 已应用的 changeset 不会回滚，需要清表请运行模块 jar 自带的 *-uninstall.sql。
+  - include:
+      file: db/changelog/module-inbox.yml
+      errorIfMissingOrEmpty: false
+  - include:
+      file: db/changelog/module-workflow.yml
+      errorIfMissingOrEmpty: false
+  - include:
+      file: db/changelog/module-cms.yml
+      errorIfMissingOrEmpty: false
+  - include:
+      file: db/changelog/module-form.yml
+      errorIfMissingOrEmpty: false
+  - include:
+      file: db/changelog/module-file.yml
+      errorIfMissingOrEmpty: false
+  - include:
+      file: db/changelog/module-report.yml
+      errorIfMissingOrEmpty: false

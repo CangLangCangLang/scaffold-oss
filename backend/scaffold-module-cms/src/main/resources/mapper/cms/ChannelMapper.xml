@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.cms.mapper.ChannelMapper">
+
+    <resultMap id="channelMap" type="com.scaffold.module.cms.domain.Channel">
+        <id     column="id"           property="id"/>
+        <result column="parent_id"    property="parentId"/>
+        <result column="code"         property="code"/>
+        <result column="name"         property="name"/>
+        <result column="order_num"    property="orderNum"/>
+        <result column="status"       property="status"/>
+        <result column="keywords"     property="keywords"/>
+        <result column="description"  property="description"/>
+        <result column="template"     property="template"/>
+        <result column="del_flag"     property="delFlag"/>
+        <result column="create_by"    property="createBy"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="update_by"    property="updateBy"/>
+        <result column="update_time"  property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, parent_id, code, name, order_num, status, keywords, description, template, del_flag,
+        create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectList" parameterType="com.scaffold.module.cms.domain.Channel" resultMap="channelMap">
+        SELECT <include refid="cols"/>
+        FROM cms_channel
+        WHERE del_flag = '0'
+        <if test="parentId != null">AND parent_id = #{parentId}</if>
+        <if test="status != null and status != ''">AND status = #{status}</if>
+        <if test="name != null and name != ''">AND name LIKE CONCAT('%', #{name}, '%')</if>
+        ORDER BY parent_id, order_num, id
+    </select>
+
+    <select id="selectActiveList" resultMap="channelMap">
+        SELECT <include refid="cols"/>
+        FROM cms_channel
+        WHERE del_flag = '0' AND status = '0'
+        ORDER BY parent_id, order_num, id
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="channelMap">
+        SELECT <include refid="cols"/>
+        FROM cms_channel
+        WHERE id = #{id} AND del_flag = '0'
+    </select>
+
+    <select id="selectByCode" parameterType="string" resultMap="channelMap">
+        SELECT <include refid="cols"/>
+        FROM cms_channel
+        WHERE code = #{code} AND del_flag = '0'
+    </select>
+
+    <select id="countByParentId" parameterType="long" resultType="int">
+        SELECT COUNT(1) FROM cms_channel WHERE parent_id = #{parentId} AND del_flag = '0'
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.cms.domain.Channel" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cms_channel (parent_id, code, name, order_num, status, keywords, description, template,
+                                 create_by, create_time)
+        VALUES (#{parentId}, #{code}, #{name}, #{orderNum}, #{status}, #{keywords}, #{description}, #{template},
+                #{createBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.cms.domain.Channel">
+        UPDATE cms_channel
+        <set>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="keywords != null">keywords = #{keywords},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="template != null">template = #{template},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="softDelete">
+        UPDATE cms_channel
+        SET del_flag = '2', update_by = #{updateBy}, update_time = NOW()
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+</mapper>

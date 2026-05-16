@@ -1,0 +1,83 @@
+databaseChangeLog:
+  - changeSet:
+      id: cms-20260507-init
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: cms_article
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/cms_init.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: cms-20260507-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 4001
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/cms_menu.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  # M-4：CMS × Workflow 联动桥需要一个字段把"启动后的流程实例 id"挂回文章。
+  # 字段是 nullable 的；桥模块未启用时永远是 NULL，不影响 M-3 自闭环逻辑。
+  # M-13：把 cms_menu.sql 里新增的 sys_role_menu 行回填到 admin role；
+  # 旧版本运行后只插入了 sys_menu 行，但没绑到 role_id=1，导致非 user_id=1 的 admin 角色用户拿不到 cms 权限。
+  # 这个 changeSet 用 INSERT IGNORE 补回，既能在升级时生效，又不会与新装环境冲突。
+  - changeSet:
+      id: cms-20260514-rolemenu-admin
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: MARK_RAN
+        - tableExists:
+            tableName: sys_role_menu
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_role_menu WHERE role_id = 1 AND menu_id = 4015
+      changes:
+        - sql:
+            sql: |
+              INSERT IGNORE INTO sys_role_menu (role_id, menu_id) VALUES
+                (1, 4001), (1, 4002), (1, 4003), (1, 4004), (1, 4005),
+                (1, 4010), (1, 4011), (1, 4012),
+                (1, 4015), (1, 4016), (1, 4017), (1, 4018), (1, 4019), (1, 4020), (1, 4021),
+                (1, 4025), (1, 4026), (1, 4027),
+                (1, 4030);
+
+  - changeSet:
+      id: cms-20260514-add-process-instance-id
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - tableExists:
+            tableName: cms_article
+        - not:
+            - columnExists:
+                tableName: cms_article
+                columnName: process_instance_id
+      changes:
+        - addColumn:
+            tableName: cms_article
+            columns:
+              - column:
+                  name: process_instance_id
+                  type: VARCHAR(64)
+                  remarks: "关联的 workflow 流程实例 id（M-4 cms-workflow 桥写入；NULL=未走 workflow）"
+                  constraints:
+                    nullable: true

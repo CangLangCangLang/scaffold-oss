@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 日志存放路径，可通过 LOG_PATH 环境变量覆盖 -->
+    <springProperty scope="context" name="log.path" source="logging.file.path" defaultValue="logs"/>
+    <springProperty scope="context" name="app.name" source="spring.application.name" defaultValue="scaffold"/>
+
+    <!-- 文本输出格式（默认） -->
+    <property name="log.pattern"
+              value="%d{HH:mm:ss.SSS} [%thread] [%X{traceId:-}] %-5level %logger{20} - [%method,%line] - %msg%n"/>
+
+    <!-- 控制台输出（文本） -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 系统 INFO 日志 -->
+    <appender name="file_info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="file_error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 用户访问日志 -->
+    <appender name="sys-user" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-user.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-user.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ============ JSON 输出 (logstash-logback-encoder)：在启用 'json' profile 时生效 ============ -->
+    <springProfile name="json">
+        <appender name="json-console" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>traceId</includeMdcKeyName>
+                <customFields>{"app":"${app.name}"}</customFields>
+            </encoder>
+        </appender>
+        <root level="info">
+            <appender-ref ref="json-console"/>
+        </root>
+        <logger name="sys-user" level="info" additivity="false">
+            <appender-ref ref="json-console"/>
+        </logger>
+    </springProfile>
+
+    <!-- ============ 默认（非 json profile） ============ -->
+    <springProfile name="!json">
+        <logger name="com.scaffold" level="info"/>
+        <logger name="org.springframework" level="warn"/>
+
+        <root level="info">
+            <appender-ref ref="console"/>
+            <appender-ref ref="file_info"/>
+            <appender-ref ref="file_error"/>
+        </root>
+
+        <logger name="sys-user" level="info" additivity="false">
+            <appender-ref ref="sys-user"/>
+        </logger>
+    </springProfile>
+</configuration>

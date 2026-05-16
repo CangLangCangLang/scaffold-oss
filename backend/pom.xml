@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+    <groupId>com.scaffold</groupId>
+    <artifactId>scaffold</artifactId>
+    <version>3.9.2</version>
+
+    <name>scaffold</name>
+    <url>https://example.com</url>
+    <description>Fullstack Scaffold</description>
+    
+    <properties>
+        <scaffold.version>3.9.2</scaffold.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>17</java.version>
+        <spring-boot.version>4.0.3</spring-boot.version>
+        <mybatis-spring-boot.version>4.0.1</mybatis-spring-boot.version>
+        <druid.version>1.2.28</druid.version>
+        <yauaa.version>8.1.0</yauaa.version>
+        <kaptcha.version>2.3.3</kaptcha.version>
+        <pagehelper.boot.version>2.1.1</pagehelper.boot.version>
+        <fastjson.version>2.0.61</fastjson.version>
+        <oshi.version>6.10.0</oshi.version>
+        <commons.io.version>2.21.0</commons.io.version>
+        <poi.version>4.1.2</poi.version>
+        <velocity.version>2.3</velocity.version>
+        <jwt.version>0.12.6</jwt.version>
+        <jaxb-api.version>2.3.1</jaxb-api.version>
+        <springdoc.version>3.0.2</springdoc.version>
+        <logstash-logback.version>7.4</logstash-logback.version>
+        <testcontainers.version>1.20.3</testcontainers.version>
+        <awssdk.version>2.28.21</awssdk.version>
+        <zjsonpatch.version>0.6.2</zjsonpatch.version>
+        <flowable.version>8.0.0</flowable.version>
+    </properties>
+
+    <!-- 依赖声明 -->
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- SpringBoot的依赖配置-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Testcontainers BOM -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- AWS SDK BOM -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${awssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- 结构化 JSON 日志 -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logstash-logback.version}</version>
+            </dependency>
+
+            <!-- 阿里数据库连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-4-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+
+            <!-- 解析客户端操作系统、浏览器等 -->
+            <dependency>
+                <groupId>nl.basjes.parse.useragent</groupId>
+                <artifactId>yauaa</artifactId>
+                <version>${yauaa.version}</version>
+            </dependency>
+
+            <!-- pagehelper 分页插件 -->
+            <dependency>
+                <groupId>com.github.pagehelper</groupId>
+                <artifactId>pagehelper-spring-boot-starter</artifactId>
+                <version>${pagehelper.boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>${jaxb-api.version}</version>
+            </dependency>
+
+            <!-- 获取系统信息 -->
+            <dependency>
+                <groupId>com.github.oshi</groupId>
+                <artifactId>oshi-core</artifactId>
+                <version>${oshi.version}</version>
+            </dependency>
+
+            <!-- spring-doc -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+
+            <!--
+                Swagger / OpenAPI 注解（@Tag / @Operation / @Parameter）。
+                业务模块（如 scaffold-module-cms）只用注解、不需要整个 SpringDoc UI 时，单独依赖此 jar。
+                版本随 SpringDoc 3.0.2 拉的 jakarta 命名空间版本。
+            -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>2.2.43</version>
+            </dependency>
+
+            <!-- io常用工具类 -->
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons.io.version}</version>
+            </dependency>
+
+            <!-- excel工具 -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${poi.version}</version>
+            </dependency>
+
+            <!-- velocity代码生成使用模板 -->
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>${velocity.version}</version>
+            </dependency>
+
+            <!-- 阿里JSON解析器 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson.version}</version>
+            </dependency>
+
+            <!-- Token生成与解析 -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- 验证码 -->
+            <dependency>
+                <groupId>pro.fessional</groupId>
+                <artifactId>kaptcha</artifactId>
+                <version>${kaptcha.version}</version>
+            </dependency>
+
+            <!-- 定时任务-->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-quartz</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 代码生成-->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-generator</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 核心模块-->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-framework</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 系统模块-->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-system</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 通用工具-->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-common</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- JSON Patch / diff（操作审计 before/after 对比） -->
+            <dependency>
+                <groupId>io.github.vishwakarma</groupId>
+                <artifactId>zjsonpatch</artifactId>
+                <version>${zjsonpatch.version}</version>
+            </dependency>
+
+            <!-- 可插拔业务模块（按需在 admin/pom.xml 中引入；删除依赖即下线） -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-inbox</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 可插拔业务模块：工作流（Flowable 8 / Spring Boot 4 兼容） -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-workflow</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 可插拔业务模块：CMS 内容管理（栏目 / 文章 / 状态机 / 公开 API） -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-cms</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 可插拔桥模块：CMS × Workflow 联动（M-4），默认关闭，
+                 启用方式见 docs/RUNBOOK；删 jar 即退回 CMS 自闭环 -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-cms-workflow</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 可插拔桥模块：CMS × Inbox 站内信通知（M-5），默认开启 -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-cms-inbox</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 可插拔业务模块：通用表单引擎（M-10，模板库 + 渲染器 + 提交记录） -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-form</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <!-- 可插拔业务模块：文件中心（M-6，sys_file + 文件夹 + 分享 + 引用计数） -->
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-file</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.scaffold</groupId>
+                <artifactId>scaffold-module-report</artifactId>
+                <version>${scaffold.version}</version>
+            </dependency>
+
+<!-- Flowable 工作流引擎 starter（仅工作流模块使用，不被其他模块依赖） -->
+            <dependency>
+                <groupId>org.flowable</groupId>
+                <artifactId>flowable-spring-boot-starter-process</artifactId>
+                <version>${flowable.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>scaffold-admin</module>
+        <module>scaffold-framework</module>
+        <module>scaffold-system</module>
+        <module>scaffold-quartz</module>
+        <module>scaffold-generator</module>
+        <module>scaffold-common</module>
+        <!-- 可插拔业务模块（每个模块独立目录，可整目录复制 / 删除） -->
+        <module>scaffold-module-inbox</module>
+        <module>scaffold-module-workflow</module>
+        <module>scaffold-module-cms</module>
+        <module>scaffold-module-form</module>
+        <module>scaffold-module-file</module>
+        <module>scaffold-module-report</module>
+        <module>scaffold-module-cms-workflow</module>
+<!-- 桥模块：跨业务联动（删 jar 即下线，原模块各自正常工作） -->
+        <module>scaffold-module-cms-inbox</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <parameters>true</parameters>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>public</id>
+            <name>aliyun nexus</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+
+</project>

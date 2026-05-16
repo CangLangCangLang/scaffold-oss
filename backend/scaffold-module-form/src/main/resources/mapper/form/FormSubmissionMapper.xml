@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.form.mapper.FormSubmissionMapper">
+
+    <resultMap id="submissionMap" type="com.scaffold.module.form.domain.FormSubmission">
+        <id     column="id"               property="id"/>
+        <result column="template_id"      property="templateId"/>
+        <result column="template_key"     property="templateKey"/>
+        <result column="template_version" property="templateVersion"/>
+        <result column="submitter"        property="submitter"/>
+        <result column="submitter_name"   property="submitterName"/>
+        <result column="status"           property="status"/>
+        <result column="data"             property="data"/>
+        <result column="create_time"      property="createTime"/>
+        <result column="update_time"      property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, template_id, template_key, template_version, submitter, submitter_name,
+        status, data, create_time, update_time
+    </sql>
+
+    <sql id="commonWhere">
+        <where>
+            <if test="q.templateId != null">AND template_id = #{q.templateId}</if>
+            <if test="q.templateKey != null and q.templateKey != ''">AND template_key = #{q.templateKey}</if>
+            <if test="q.submitter != null and q.submitter != ''">AND submitter = #{q.submitter}</if>
+            <if test="q.beginTime != null and q.beginTime != ''">AND create_time &gt;= #{q.beginTime}</if>
+            <if test="q.endTime != null and q.endTime != ''">AND create_time &lt;= #{q.endTime}</if>
+        </where>
+    </sql>
+
+    <insert id="insert" parameterType="com.scaffold.module.form.domain.FormSubmission"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO form_submission
+            (template_id, template_key, template_version, submitter, submitter_name,
+             status, data, create_time, update_time)
+        VALUES
+            (#{templateId}, #{templateKey}, #{templateVersion}, #{submitter}, #{submitterName},
+             #{status}, #{data}, NOW(), NOW())
+    </insert>
+
+    <select id="selectById" resultMap="submissionMap">
+        SELECT <include refid="cols"/> FROM form_submission WHERE id = #{id}
+    </select>
+
+    <select id="selectPage" resultMap="submissionMap">
+        SELECT <include refid="cols"/>
+        FROM form_submission
+        <include refid="commonWhere"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1) FROM form_submission
+        <include refid="commonWhere"/>
+    </select>
+
+</mapper>

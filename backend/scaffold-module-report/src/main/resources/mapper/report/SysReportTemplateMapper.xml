@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.report.mapper.SysReportTemplateMapper">
+
+    <resultMap id="tplMap" type="com.scaffold.module.report.domain.SysReportTemplate">
+        <id     column="id"             property="id"/>
+        <result column="code"           property="code"/>
+        <result column="name"           property="name"/>
+        <result column="category"       property="category"/>
+        <result column="datasource_id"  property="datasourceId"/>
+        <result column="sql_text"       property="sqlText"/>
+        <result column="param_schema"   property="paramSchema"/>
+        <result column="row_limit"      property="rowLimit"/>
+        <result column="timeout_ms"     property="timeoutMs"/>
+        <result column="perm_key"       property="permKey"/>
+        <result column="status"         property="status"/>
+        <result column="remark"         property="remark"/>
+        <result column="create_by"      property="createBy"/>
+        <result column="create_time"    property="createTime"/>
+        <result column="update_by"      property="updateBy"/>
+        <result column="update_time"    property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, code, name, category, datasource_id, sql_text, param_schema, row_limit,
+        timeout_ms, perm_key, status, remark, create_by, create_time, update_by, update_time
+    </sql>
+
+    <sql id="commonWhere">
+        <where>
+            <if test="q.name != null and q.name != ''">
+                AND name LIKE CONCAT('%', #{q.name}, '%')
+            </if>
+            <if test="q.category != null and q.category != ''">
+                AND category = #{q.category}
+            </if>
+            <if test="q.status != null and q.status != ''">
+                AND status = #{q.status}
+            </if>
+            <if test="q.createBy != null and q.createBy != ''">
+                AND create_by = #{q.createBy}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="tplMap">
+        SELECT <include refid="cols"/>
+        FROM sys_report_template
+        <include refid="commonWhere"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_report_template
+        <include refid="commonWhere"/>
+    </select>
+
+    <select id="selectById" resultMap="tplMap">
+        SELECT <include refid="cols"/> FROM sys_report_template WHERE id = #{id}
+    </select>
+
+    <select id="selectByCode" resultMap="tplMap">
+        SELECT <include refid="cols"/> FROM sys_report_template WHERE code = #{code}
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.report.domain.SysReportTemplate"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_report_template
+        (code, name, category, datasource_id, sql_text, param_schema, row_limit,
+         timeout_ms, perm_key, status, remark, create_by, create_time)
+        VALUES
+        (#{code}, #{name}, #{category}, #{datasourceId}, #{sqlText}, #{paramSchema},
+         #{rowLimit}, #{timeoutMs}, #{permKey}, #{status}, #{remark}, #{createBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.report.domain.SysReportTemplate">
+        UPDATE sys_report_template
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="datasourceId != null">datasource_id = #{datasourceId},</if>
+            <if test="sqlText != null">sql_text = #{sqlText},</if>
+            <if test="paramSchema != null">param_schema = #{paramSchema},</if>
+            <if test="rowLimit != null">row_limit = #{rowLimit},</if>
+            <if test="timeoutMs != null">timeout_ms = #{timeoutMs},</if>
+            <if test="permKey != null">perm_key = #{permKey},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_report_template WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.file.mapper.SysFileFolderMapper">
+
+    <resultMap id="folderMap" type="com.scaffold.module.file.domain.SysFileFolder">
+        <id     column="id"          property="id"/>
+        <result column="owner"       property="owner"/>
+        <result column="parent_id"   property="parentId"/>
+        <result column="name"        property="name"/>
+        <result column="path"        property="path"/>
+        <result column="del_flag"    property="delFlag"/>
+        <result column="create_by"   property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by"   property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, owner, parent_id, name, path, del_flag, create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectByOwner" resultMap="folderMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file_folder
+        WHERE owner = #{owner} AND del_flag = '0'
+        ORDER BY parent_id ASC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="folderMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file_folder
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByOwnerAndPath" resultMap="folderMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file_folder
+        WHERE owner = #{owner} AND path = #{path} AND del_flag = '0'
+        LIMIT 1
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.file.domain.SysFileFolder"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_file_folder
+            (owner, parent_id, name, path, del_flag, create_by, create_time, update_by, update_time)
+        VALUES
+            (#{owner}, #{parentId}, #{name}, #{path}, '0', #{createBy}, NOW(), #{updateBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.file.domain.SysFileFolder">
+        UPDATE sys_file_folder
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="path != null">path = #{path},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="softDeleteSubtree">
+        UPDATE sys_file_folder
+        SET del_flag = '2', update_time = NOW()
+        WHERE owner = #{owner} AND del_flag = '0'
+          AND (path = #{pathPrefix} OR path LIKE CONCAT(#{pathPrefix}, '/%'))
+    </update>
+
+</mapper>

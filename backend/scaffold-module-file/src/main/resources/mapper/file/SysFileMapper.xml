@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.file.mapper.SysFileMapper">
+
+    <resultMap id="fileMap" type="com.scaffold.module.file.domain.SysFile">
+        <id     column="id"             property="id"/>
+        <result column="bucket"         property="bucket"/>
+        <result column="folder_id"      property="folderId"/>
+        <result column="name"           property="name"/>
+        <result column="original_name"  property="originalName"/>
+        <result column="ext"            property="ext"/>
+        <result column="mime"           property="mime"/>
+        <result column="size_bytes"     property="sizeBytes"/>
+        <result column="storage_path"   property="storagePath"/>
+        <result column="category"       property="category"/>
+        <result column="tags"           property="tags"/>
+        <result column="ref_count"      property="refCount"/>
+        <result column="del_flag"       property="delFlag"/>
+        <result column="delete_time"    property="deleteTime"/>
+        <result column="create_by"      property="createBy"/>
+        <result column="create_by_name" property="createByName"/>
+        <result column="create_time"    property="createTime"/>
+        <result column="update_by"      property="updateBy"/>
+        <result column="update_time"    property="updateTime"/>
+        <result column="remark"         property="remark"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, bucket, folder_id, name, original_name, ext, mime, size_bytes, storage_path,
+        category, tags, ref_count, del_flag, delete_time, create_by, create_by_name,
+        create_time, update_by, update_time, remark
+    </sql>
+
+    <sql id="commonWhere">
+        <where>
+            <choose>
+                <when test="q.delFlag != null and q.delFlag != ''">
+                    del_flag = #{q.delFlag}
+                </when>
+                <otherwise>
+                    del_flag = '0'
+                </otherwise>
+            </choose>
+            <if test="q.name != null and q.name != ''">
+                AND name LIKE CONCAT('%', #{q.name}, '%')
+            </if>
+            <if test="q.createBy != null and q.createBy != ''">
+                AND create_by = #{q.createBy}
+            </if>
+            <if test="q.bucket != null and q.bucket != ''">
+                AND bucket = #{q.bucket}
+            </if>
+            <if test="q.ext != null and q.ext != ''">
+                AND ext = #{q.ext}
+            </if>
+            <if test="q.mime != null and q.mime != ''">
+                AND mime LIKE CONCAT(#{q.mime}, '%')
+            </if>
+            <if test="q.category != null and q.category != ''">
+                AND category = #{q.category}
+            </if>
+            <if test="q.folderId != null">
+                AND folder_id <choose>
+                    <when test="q.folderId == 0">IS NULL OR folder_id = 0</when>
+                    <otherwise>= #{q.folderId}</otherwise>
+                </choose>
+            </if>
+            <if test="q.beginTime != null and q.beginTime != ''">
+                AND create_time &gt;= #{q.beginTime}
+            </if>
+            <if test="q.endTime != null and q.endTime != ''">
+                AND create_time &lt;= #{q.endTime}
+            </if>
+            <if test="q.minBytes != null">AND size_bytes &gt;= #{q.minBytes}</if>
+            <if test="q.maxBytes != null">AND size_bytes &lt;= #{q.maxBytes}</if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="fileMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file
+        <include refid="commonWhere"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1) FROM sys_file
+        <include refid="commonWhere"/>
+    </select>
+
+    <select id="selectById" resultMap="fileMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.file.domain.SysFile"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_file
+            (bucket, folder_id, name, original_name, ext, mime, size_bytes, storage_path,
+             category, tags, ref_count, del_flag, create_by, create_by_name,
+             create_time, update_by, update_time, remark)
+        VALUES
+            (#{bucket}, #{folderId}, #{name}, #{originalName}, #{ext}, #{mime}, #{sizeBytes}, #{storagePath},
+             #{category}, #{tags}, COALESCE(#{refCount}, 0), '0', #{createBy}, #{createByName},
+             NOW(), #{updateBy}, NOW(), #{remark})
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.file.domain.SysFile">
+        UPDATE sys_file
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="folderId != null">folder_id = #{folderId},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="tags != null">tags = #{tags},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="softDeleteById">
+        UPDATE sys_file
+        SET del_flag = '2', delete_time = NOW(), update_by = #{operator}, update_time = NOW()
+        WHERE id = #{id} AND del_flag = '0' AND ref_count = 0
+    </update>
+
+    <delete id="hardDeleteById">
+        DELETE FROM sys_file WHERE id = #{id} AND ref_count = 0
+    </delete>
+
+    <update id="incrRefCount">
+        UPDATE sys_file SET ref_count = ref_count + 1, update_time = NOW()
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="decrRefCount">
+        UPDATE sys_file SET ref_count = GREATEST(ref_count - 1, 0), update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="selectExpiredSoftDeleted" resultMap="fileMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file
+        WHERE del_flag = '2'
+          AND ref_count = 0
+          AND delete_time IS NOT NULL
+          AND delete_time &lt;= #{threshold}
+        ORDER BY delete_time ASC
+        LIMIT 500
+    </select>
+
+</mapper>

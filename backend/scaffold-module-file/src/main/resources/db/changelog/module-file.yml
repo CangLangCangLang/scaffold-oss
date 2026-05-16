@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: file-20260520-init
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: sys_file
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/file_init.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: file-20260520-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 6001
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/file_menu.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;

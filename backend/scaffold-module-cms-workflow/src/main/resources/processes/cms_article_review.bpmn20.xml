@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+             xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI"
+             targetNamespace="http://scaffold.com/bpmn/cms"
+             expressionLanguage="http://www.w3.org/1999/XPath"
+             typeLanguage="http://www.w3.org/2001/XMLSchema">
+
+  <!--
+    CMS 文章审核 - 最小可用单审批节点
+    起草人 (start) → 审核 (userTask, candidateGroups=cms_reviewer) → 排他网关按 approved 分叉 → 结束
+
+    关键点：
+      - businessKey = articleId（由 WorkflowAwareCmsAdapter.startProcess 注入）
+      - 审核 task complete 时需要传变量：approved (Boolean) / reason (String, 驳回时必填) / reviewer (String, 选填)
+      - 反向同步由 ArticleWorkflowEventListener 在 PROCESS_COMPLETED 时读取上述变量并回调 ArticleService
+
+    审核人候选：默认走 candidateGroups="cms_reviewer"，
+    项目落地时可以在自家 BPMN 里覆盖（同 key 部署新版即可），
+    或者在引擎里改 task assignee 也行。
+  -->
+
+  <process id="cms_article_review" name="CMS 文章审核" isExecutable="true">
+
+    <startEvent id="start" name="起草" flowable:initiator="submitter"/>
+
+    <sequenceFlow id="flow_start_review" sourceRef="start" targetRef="review"/>
+
+    <userTask id="review" name="审核文章"
+              flowable:candidateGroups="cms_reviewer"
+              flowable:formFieldValidation="false">
+      <documentation>审核 CMS 文章。完成时请填表单变量：approved=true/false, reason=驳回原因（驳回必填）, reviewer=本人 userId。</documentation>
+    </userTask>
+
+    <sequenceFlow id="flow_review_gw" sourceRef="review" targetRef="gw_decision"/>
+
+    <exclusiveGateway id="gw_decision" name="是否通过" default="flow_rejected"/>
+
+    <sequenceFlow id="flow_approved" sourceRef="gw_decision" targetRef="end_published">
+      <conditionExpression xsi:type="tFormalExpression"
+                           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        ${approved == true}
+      </conditionExpression>
+    </sequenceFlow>
+
+    <sequenceFlow id="flow_rejected" sourceRef="gw_decision" targetRef="end_rejected"/>
+
+    <endEvent id="end_published" name="发布通过"/>
+    <endEvent id="end_rejected" name="驳回退回草稿"/>
+
+  </process>
+
+  <bpmndi:BPMNDiagram id="diagram_cms_article_review">
+    <bpmndi:BPMNPlane id="plane_cms_article_review" bpmnElement="cms_article_review">
+
+      <bpmndi:BPMNShape id="shape_start" bpmnElement="start">
+        <omgdc:Bounds x="60" y="100" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="shape_review" bpmnElement="review">
+        <omgdc:Bounds x="160" y="80" width="120" height="70"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="shape_gw" bpmnElement="gw_decision" isMarkerVisible="true">
+        <omgdc:Bounds x="340" y="95" width="40" height="40"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="shape_end_pub" bpmnElement="end_published">
+        <omgdc:Bounds x="440" y="60" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="shape_end_rej" bpmnElement="end_rejected">
+        <omgdc:Bounds x="440" y="140" width="30" height="30"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="edge_start_review" bpmnElement="flow_start_review">
+        <omgdi:waypoint x="90" y="115"/>
+        <omgdi:waypoint x="160" y="115"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="edge_review_gw" bpmnElement="flow_review_gw">
+        <omgdi:waypoint x="280" y="115"/>
+        <omgdi:waypoint x="340" y="115"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="edge_approved" bpmnElement="flow_approved">
+        <omgdi:waypoint x="380" y="115"/>
+        <omgdi:waypoint x="440" y="75"/>
+      </bpmndi:BPMNEdge>
+
+      <bpmndi:BPMNEdge id="edge_rejected" bpmnElement="flow_rejected">
+        <omgdi:waypoint x="380" y="115"/>
+        <omgdi:waypoint x="440" y="155"/>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</definitions>

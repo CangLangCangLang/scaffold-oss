@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: form-20260516-init
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: form_template
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/form_init.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: form-20260516-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 5001
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/form_menu.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.workflow.mapper.WfFormSchemaMapper">
+
+    <resultMap id="FormSchemaResult" type="com.scaffold.module.workflow.domain.WfFormSchema">
+        <id property="id" column="id"/>
+        <result property="processDefinitionKey" column="process_definition_key"/>
+        <result property="activityId" column="activity_id"/>
+        <result property="name" column="name"/>
+        <result property="version" column="version"/>
+        <result property="schemaJson" column="schema_json"/>
+        <result property="enabled" column="enabled"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id"
+            parameterType="com.scaffold.module.workflow.domain.WfFormSchema">
+        INSERT INTO wf_form_schema
+            (process_definition_key, activity_id, name, version, schema_json, enabled,
+             create_by, create_time, update_by, update_time)
+        VALUES
+            (#{processDefinitionKey}, #{activityId}, #{name}, COALESCE(#{version}, 1),
+             #{schemaJson}, COALESCE(#{enabled}, 1), #{createBy}, NOW(), #{updateBy}, NOW())
+    </insert>
+
+    <update id="updateSelective" parameterType="com.scaffold.module.workflow.domain.WfFormSchema">
+        UPDATE wf_form_schema
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="schemaJson != null">schema_json = #{schemaJson},</if>
+            <if test="enabled != null">enabled = #{enabled},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="disableOldVersions">
+        UPDATE wf_form_schema
+        SET enabled = 0, update_time = NOW()
+        WHERE process_definition_key = #{processDefinitionKey}
+          AND activity_id = #{activityId}
+          AND enabled = 1
+          <if test="excludeId != null">AND id &lt;&gt; #{excludeId}</if>
+    </update>
+
+    <select id="selectActiveLatest" resultMap="FormSchemaResult">
+        SELECT id, process_definition_key, activity_id, name, version, schema_json, enabled,
+               create_by, create_time, update_by, update_time
+        FROM wf_form_schema
+        WHERE process_definition_key = #{processDefinitionKey}
+          AND activity_id = #{activityId}
+          AND enabled = 1
+        ORDER BY version DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectById" resultMap="FormSchemaResult">
+        SELECT id, process_definition_key, activity_id, name, version, schema_json, enabled,
+               create_by, create_time, update_by, update_time
+        FROM wf_form_schema
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAllByDefinitionKey" resultMap="FormSchemaResult">
+        SELECT id, process_definition_key, activity_id, name, version, schema_json, enabled,
+               create_by, create_time, update_by, update_time
+        FROM wf_form_schema
+        WHERE process_definition_key = #{processDefinitionKey}
+        ORDER BY activity_id ASC, version DESC
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM wf_form_schema WHERE id = #{id}
+    </delete>
+
+</mapper>

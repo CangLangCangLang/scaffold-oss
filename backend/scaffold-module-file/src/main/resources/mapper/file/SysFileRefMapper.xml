@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.file.mapper.SysFileRefMapper">
+
+    <resultMap id="refMap" type="com.scaffold.module.file.domain.SysFileRef">
+        <id     column="id"          property="id"/>
+        <result column="file_id"     property="fileId"/>
+        <result column="ref_module"  property="refModule"/>
+        <result column="ref_type"    property="refType"/>
+        <result column="ref_id"      property="refId"/>
+        <result column="create_by"   property="createBy"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insertIgnore" parameterType="com.scaffold.module.file.domain.SysFileRef"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO sys_file_ref
+            (file_id, ref_module, ref_type, ref_id, create_by, create_time)
+        VALUES
+            (#{fileId}, #{refModule}, #{refType}, #{refId}, #{createBy}, NOW())
+    </insert>
+
+    <delete id="deleteOne">
+        DELETE FROM sys_file_ref
+        WHERE file_id = #{fileId}
+          AND ref_module = #{module}
+          AND ref_type = #{type}
+          AND ref_id = #{id}
+    </delete>
+
+    <delete id="deleteByFileId">
+        DELETE FROM sys_file_ref WHERE file_id = #{fileId}
+    </delete>
+
+    <select id="selectByFile" resultMap="refMap">
+        SELECT id, file_id, ref_module, ref_type, ref_id, create_by, create_time
+        FROM sys_file_ref
+        WHERE file_id = #{fileId}
+        ORDER BY id DESC
+    </select>
+
+</mapper>

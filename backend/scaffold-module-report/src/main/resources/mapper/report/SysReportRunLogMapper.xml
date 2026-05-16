@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.report.mapper.SysReportRunLogMapper">
+
+    <resultMap id="logMap" type="com.scaffold.module.report.domain.SysReportRunLog">
+        <id     column="id"             property="id"/>
+        <result column="template_id"    property="templateId"/>
+        <result column="template_code"  property="templateCode"/>
+        <result column="datasource_id"  property="datasourceId"/>
+        <result column="sql_preview"    property="sqlPreview"/>
+        <result column="param_json"     property="paramJson"/>
+        <result column="row_count"      property="rowCount"/>
+        <result column="cost_ms"        property="costMs"/>
+        <result column="status"         property="status"/>
+        <result column="error_msg"      property="errorMsg"/>
+        <result column="create_by"      property="createBy"/>
+        <result column="create_time"    property="createTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, template_id, template_code, datasource_id, sql_preview, param_json,
+        row_count, cost_ms, status, error_msg, create_by, create_time
+    </sql>
+
+    <insert id="insert" parameterType="com.scaffold.module.report.domain.SysReportRunLog"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_report_run_log
+        (template_id, template_code, datasource_id, sql_preview, param_json,
+         row_count, cost_ms, status, error_msg, create_by, create_time)
+        VALUES
+        (#{templateId}, #{templateCode}, #{datasourceId}, #{sqlPreview}, #{paramJson},
+         #{rowCount}, #{costMs}, #{status}, #{errorMsg}, #{createBy}, NOW())
+    </insert>
+
+    <select id="selectPage" resultMap="logMap">
+        SELECT <include refid="cols"/>
+        FROM sys_report_run_log
+        <where>
+            <if test="templateId != null">AND template_id = #{templateId}</if>
+            <if test="createBy != null and createBy != ''">AND create_by = #{createBy}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(1)
+        FROM sys_report_run_log
+        <where>
+            <if test="templateId != null">AND template_id = #{templateId}</if>
+            <if test="createBy != null and createBy != ''">AND create_by = #{createBy}</if>
+            <if test="status != null and status != ''">AND status = #{status}</if>
+        </where>
+    </select>
+
+    <delete id="deleteOlderThan">
+        DELETE FROM sys_report_run_log WHERE create_time &lt; #{threshold}
+    </delete>
+
+</mapper>

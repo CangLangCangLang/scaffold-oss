@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold</artifactId>
+        <groupId>com.scaffold</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>scaffold-module-cms-inbox</artifactId>
+    <description>
+        CMS × Inbox 通知桥（M-5）：CMS 文章状态变更（发布 / 驳回 / 下线）→ 给作者发站内信。
+        订阅 ArticleStatusChangedEvent，调 framework 的 MessagePublisher（不直接依赖 inbox 模块；
+        若 inbox 模块启用则自动落库 message_inbox，否则仅 WebSocket 推送）。
+        默认开启；删 jar 即仅是不发站内信，CMS 状态机本身不受影响。
+    </description>
+
+    <dependencies>
+        <!-- 直接依赖 cms 本体（订阅其 ApplicationEvent + 读 article 信息）；
+             不依赖 scaffold-module-inbox：MessagePublisher 在 framework 中。 -->
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-module-cms</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

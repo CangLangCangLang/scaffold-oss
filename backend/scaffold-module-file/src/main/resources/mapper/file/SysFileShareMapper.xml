@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.file.mapper.SysFileShareMapper">
+
+    <resultMap id="shareMap" type="com.scaffold.module.file.domain.SysFileShare">
+        <id     column="id"            property="id"/>
+        <result column="file_id"       property="fileId"/>
+        <result column="token"         property="token"/>
+        <result column="expire_at"     property="expireAt"/>
+        <result column="one_time"      property="oneTime"/>
+        <result column="visits"        property="visits"/>
+        <result column="password_hash" property="passwordHash"/>
+        <result column="status"        property="status"/>
+        <result column="create_by"     property="createBy"/>
+        <result column="create_time"   property="createTime"/>
+        <result column="update_time"   property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, file_id, token, expire_at, one_time, visits, password_hash, status,
+        create_by, create_time, update_time
+    </sql>
+
+    <select id="selectByCreator" resultMap="shareMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file_share
+        WHERE create_by = #{createBy}
+        ORDER BY create_time DESC, id DESC
+    </select>
+
+    <select id="selectByToken" resultMap="shareMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file_share
+        WHERE token = #{token}
+        LIMIT 1
+    </select>
+
+    <select id="selectById" resultMap="shareMap">
+        SELECT <include refid="cols"/>
+        FROM sys_file_share
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.file.domain.SysFileShare"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_file_share
+            (file_id, token, expire_at, one_time, visits, password_hash, status,
+             create_by, create_time, update_time)
+        VALUES
+            (#{fileId}, #{token}, #{expireAt}, COALESCE(#{oneTime}, '0'), COALESCE(#{visits}, 0),
+             #{passwordHash}, COALESCE(#{status}, '0'), #{createBy}, NOW(), NOW())
+    </insert>
+
+    <update id="incrVisits">
+        UPDATE sys_file_share SET visits = visits + 1, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE sys_file_share SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_file_share WHERE id = #{id}
+    </delete>
+
+</mapper>

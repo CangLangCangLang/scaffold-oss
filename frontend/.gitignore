@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+.cache
+.temp
+.local
+.tmp
+.eslintrc-auto-import.json
+src/types/auto-imports.d.ts
+src/types/components.d.ts
+*.tsbuildinfo
+*.local
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.log*

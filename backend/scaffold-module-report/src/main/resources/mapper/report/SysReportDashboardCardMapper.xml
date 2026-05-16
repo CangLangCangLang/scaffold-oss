@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.report.mapper.SysReportDashboardCardMapper">
+
+    <resultMap id="cardMap" type="com.scaffold.module.report.domain.SysReportDashboardCard">
+        <id     column="id"            property="id"/>
+        <result column="dashboard_id"  property="dashboardId"/>
+        <result column="template_id"   property="templateId"/>
+        <result column="title"         property="title"/>
+        <result column="chart_type"    property="chartType"/>
+        <result column="config_json"   property="configJson"/>
+        <result column="param_json"    property="paramJson"/>
+        <result column="pos_x"         property="posX"/>
+        <result column="pos_y"         property="posY"/>
+        <result column="pos_w"         property="posW"/>
+        <result column="pos_h"         property="posH"/>
+        <result column="order_num"     property="orderNum"/>
+        <result column="create_time"   property="createTime"/>
+        <result column="update_time"   property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, dashboard_id, template_id, title, chart_type, config_json, param_json,
+        pos_x, pos_y, pos_w, pos_h, order_num, create_time, update_time
+    </sql>
+
+    <select id="selectByDashboardId" resultMap="cardMap">
+        SELECT <include refid="cols"/>
+        FROM sys_report_dashboard_card
+        WHERE dashboard_id = #{dashboardId}
+        ORDER BY order_num ASC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="cardMap">
+        SELECT <include refid="cols"/> FROM sys_report_dashboard_card WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.report.domain.SysReportDashboardCard"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_report_dashboard_card
+        (dashboard_id, template_id, title, chart_type, config_json, param_json,
+         pos_x, pos_y, pos_w, pos_h, order_num, create_time)
+        VALUES
+        (#{dashboardId}, #{templateId}, #{title}, #{chartType}, #{configJson}, #{paramJson},
+         #{posX}, #{posY}, #{posW}, #{posH}, #{orderNum}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.report.domain.SysReportDashboardCard">
+        UPDATE sys_report_dashboard_card
+        <set>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="chartType != null">chart_type = #{chartType},</if>
+            <if test="configJson != null">config_json = #{configJson},</if>
+            <if test="paramJson != null">param_json = #{paramJson},</if>
+            <if test="posX != null">pos_x = #{posX},</if>
+            <if test="posY != null">pos_y = #{posY},</if>
+            <if test="posW != null">pos_w = #{posW},</if>
+            <if test="posH != null">pos_h = #{posH},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_report_dashboard_card WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByDashboardId">
+        DELETE FROM sys_report_dashboard_card WHERE dashboard_id = #{dashboardId}
+    </delete>
+
+</mapper>

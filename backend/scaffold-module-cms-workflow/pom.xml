@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>scaffold</artifactId>
+        <groupId>com.scaffold</groupId>
+        <version>3.9.2</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>scaffold-module-cms-workflow</artifactId>
+    <description>
+        CMS × Workflow 联动桥（M-4）：把 CMS 的"提交审核"接到 Flowable 真审批流。
+        必须同时拥有 scaffold-module-cms 与 scaffold-module-workflow 两个依赖才能编译；
+        但默认关闭，需要 app.module.cms.workflow.enabled=true 显式启用。
+        删 jar 即下线，CMS 退回自闭环状态机；workflow 模块不受影响。
+    </description>
+
+    <dependencies>
+        <!-- 直接依赖 cms 与 workflow 两个模块；删任一都会让本桥模块编译挂掉，符合"桥"的语义 -->
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-module-cms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.scaffold</groupId>
+            <artifactId>scaffold-module-workflow</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+</project>

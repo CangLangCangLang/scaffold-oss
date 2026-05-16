@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.report.mapper.SysReportDataSourceMapper">
+
+    <resultMap id="dsMap" type="com.scaffold.module.report.domain.SysReportDataSource">
+        <id     column="id"           property="id"/>
+        <result column="code"         property="code"/>
+        <result column="name"         property="name"/>
+        <result column="type"         property="type"/>
+        <result column="jdbc_url"     property="jdbcUrl"/>
+        <result column="driver_class" property="driverClass"/>
+        <result column="username"     property="username"/>
+        <result column="password_enc" property="passwordEnc"/>
+        <result column="status"       property="status"/>
+        <result column="remark"       property="remark"/>
+        <result column="create_by"    property="createBy"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="update_by"    property="updateBy"/>
+        <result column="update_time"  property="updateTime"/>
+    </resultMap>
+
+    <sql id="cols">
+        id, code, name, type, jdbc_url, driver_class, username, password_enc,
+        status, remark, create_by, create_time, update_by, update_time
+    </sql>
+
+    <select id="selectAll" resultMap="dsMap">
+        SELECT <include refid="cols"/> FROM sys_report_datasource ORDER BY id ASC
+    </select>
+
+    <select id="selectById" resultMap="dsMap">
+        SELECT <include refid="cols"/> FROM sys_report_datasource WHERE id = #{id}
+    </select>
+
+    <select id="selectByCode" resultMap="dsMap">
+        SELECT <include refid="cols"/> FROM sys_report_datasource WHERE code = #{code}
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.report.domain.SysReportDataSource"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_report_datasource
+        (code, name, type, jdbc_url, driver_class, username, password_enc, status,
+         remark, create_by, create_time)
+        VALUES
+        (#{code}, #{name}, #{type}, #{jdbcUrl}, #{driverClass}, #{username}, #{passwordEnc},
+         #{status}, #{remark}, #{createBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.report.domain.SysReportDataSource">
+        UPDATE sys_report_datasource
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="jdbcUrl != null">jdbc_url = #{jdbcUrl},</if>
+            <if test="driverClass != null">driver_class = #{driverClass},</if>
+            <if test="username != null">username = #{username},</if>
+            <if test="passwordEnc != null">password_enc = #{passwordEnc},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_report_datasource WHERE id = #{id}
+    </delete>
+
+</mapper>

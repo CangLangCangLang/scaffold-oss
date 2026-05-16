@@ -1,0 +1,92 @@
+######################################################################
+# Build Tools
+
+.gradle
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# 临时 commit message 文件
+.commit-msg.tmp
+
+######################################################################
+# IDE
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### JRebel ###
+rebel.xml
+
+### NetBeans ###
+nbproject/private/
+build/*
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+######################################################################
+# Others
+/.env
+/.env.local
+/.env.*.local
+*.log
+*.xml.versionsBackup
+*.swp
+# Temp commit message scratchpads written when running git on Windows PowerShell
+.git-commit-msg.tmp
+.git-amend-msg.tmp
+.git-*-msg.tmp
+
+!*/build/*.java
+!*/build/*.html
+!*/build/*.xml
+
+######################################################################
+# Local debug scratchpads (临时调试 Java/SQL/PowerShell 工具，不入库)
+/backend/Reset.java
+/backend/Reset.class
+/backend/QueryCms.java
+/backend/QueryCms.class
+/backend/QueryRole.java
+/backend/QueryRole.class
+/backend/mysql-connector.jar
+/backend/uploadPath/
+/uploadPath/
+/backend/scripts/manual-test-*.ps1
+/backend/scripts/debug-*.ps1
+/verify-logs/
+
+######################################################################
+# Frontend artifacts
+node_modules/
+**/node_modules/
+**/dist/
+**/.vite/
+**/components.d.ts
+
+# Test / coverage artifacts
+**/coverage/
+frontend/test-results/
+frontend/playwright-report/
+frontend/.eslintrc-auto-import.json
+
+######################################################################
+# Transitional rename artifact (frontend-next → frontend); IDE may
+# briefly hold the old folder open. Safe to delete after restarting
+# the IDE.
+/frontend-next/

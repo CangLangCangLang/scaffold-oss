@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: 20260505-message-inbox
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: sys_message_inbox
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/message_inbox.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+  - changeSet:
+      id: 20260507-message-inbox-page-index
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - tableExists:
+            tableName: sys_message_inbox
+        - not:
+            - indexExists:
+                tableName: sys_message_inbox
+                indexName: idx_target_status_created
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/message_inbox-page-index.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;

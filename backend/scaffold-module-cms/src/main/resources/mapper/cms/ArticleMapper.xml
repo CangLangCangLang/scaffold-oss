@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scaffold.module.cms.mapper.ArticleMapper">
+
+    <resultMap id="articleSummaryMap" type="com.scaffold.module.cms.domain.Article">
+        <id     column="id"                 property="id"/>
+        <result column="channel_id"         property="channelId"/>
+        <result column="title"              property="title"/>
+        <result column="slug"               property="slug"/>
+        <result column="summary"            property="summary"/>
+        <result column="cover_url"          property="coverUrl"/>
+        <result column="source"             property="source"/>
+        <result column="author"             property="author"/>
+        <result column="status"             property="status"/>
+        <result column="meta_title"         property="metaTitle"/>
+        <result column="meta_description"   property="metaDescription"/>
+        <result column="meta_keywords"      property="metaKeywords"/>
+        <result column="canonical_url"      property="canonicalUrl"/>
+        <result column="published_at"       property="publishedAt"/>
+        <result column="view_count"         property="viewCount"/>
+        <result column="sort_order"         property="sortOrder"/>
+        <result column="del_flag"           property="delFlag"/>
+        <result column="process_instance_id" property="processInstanceId"/>
+        <result column="create_by"          property="createBy"/>
+        <result column="create_time"        property="createTime"/>
+        <result column="update_by"          property="updateBy"/>
+        <result column="update_time"        property="updateTime"/>
+    </resultMap>
+
+    <resultMap id="articleFullMap" type="com.scaffold.module.cms.domain.Article" extends="articleSummaryMap">
+        <result column="content_html" property="contentHtml"/>
+    </resultMap>
+
+    <resultMap id="articleTagPairMap" type="com.scaffold.module.cms.dto.ArticleTagPair">
+        <result column="article_id" property="articleId"/>
+        <result column="tag_id"     property="tagId"/>
+    </resultMap>
+
+    <sql id="summaryCols">
+        a.id, a.channel_id, a.title, a.slug, a.summary, a.cover_url, a.source, a.author, a.status,
+        a.meta_title, a.meta_description, a.meta_keywords, a.canonical_url,
+        a.published_at, a.view_count, a.sort_order, a.del_flag, a.process_instance_id,
+        a.create_by, a.create_time, a.update_by, a.update_time
+    </sql>
+
+    <sql id="adminWhere">
+        WHERE a.del_flag = '0'
+        <if test="channelId != null">AND a.channel_id = #{channelId}</if>
+        <if test="status != null and status != ''">AND a.status = #{status}</if>
+        <if test="createBy != null and createBy != ''">AND a.create_by = #{createBy}</if>
+        <if test="keyword != null and keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{keyword}, '%')
+              OR a.summary LIKE CONCAT('%', #{keyword}, '%')
+              OR a.content_html LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="startTime != null">AND a.create_time &gt;= #{startTime}</if>
+        <if test="endTime != null">AND a.create_time &lt;= #{endTime}</if>
+    </sql>
+
+    <select id="selectAdminList" parameterType="com.scaffold.module.cms.dto.ArticleQuery" resultMap="articleSummaryMap">
+        SELECT <include refid="summaryCols"/>
+        FROM cms_article a
+        <if test="tagId != null">
+            INNER JOIN cms_article_tag at ON at.article_id = a.id AND at.tag_id = #{tagId}
+        </if>
+        <include refid="adminWhere"/>
+        ORDER BY a.sort_order DESC, a.id DESC
+    </select>
+
+    <select id="selectPublicList" parameterType="com.scaffold.module.cms.dto.ArticleQuery" resultMap="articleSummaryMap">
+        SELECT <include refid="summaryCols"/>
+        FROM cms_article a
+        <if test="tagId != null">
+            INNER JOIN cms_article_tag at ON at.article_id = a.id AND at.tag_id = #{tagId}
+        </if>
+        WHERE a.del_flag = '0' AND a.status = 'PUBLISHED'
+        <if test="channelId != null">AND a.channel_id = #{channelId}</if>
+        <if test="keyword != null and keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{keyword}, '%')
+              OR a.summary LIKE CONCAT('%', #{keyword}, '%')
+              OR a.content_html LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY a.sort_order DESC, a.published_at DESC, a.id DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="articleFullMap">
+        SELECT <include refid="summaryCols"/>, a.content_html
+        FROM cms_article a
+        WHERE a.id = #{id} AND a.del_flag = '0'
+    </select>
+
+    <select id="selectPublicBySlug" parameterType="string" resultMap="articleFullMap">
+        SELECT <include refid="summaryCols"/>, a.content_html
+        FROM cms_article a
+        WHERE a.slug = #{slug} AND a.del_flag = '0' AND a.status = 'PUBLISHED'
+    </select>
+
+    <select id="selectBySlug" parameterType="string" resultMap="articleFullMap">
+        SELECT <include refid="summaryCols"/>, a.content_html
+        FROM cms_article a
+        WHERE a.slug = #{slug} AND a.del_flag = '0'
+    </select>
+
+    <insert id="insert" parameterType="com.scaffold.module.cms.domain.Article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO cms_article (channel_id, title, slug, summary, cover_url, content_html,
+                                 source, author, status,
+                                 meta_title, meta_description, meta_keywords, canonical_url,
+                                 published_at, view_count, sort_order,
+                                 create_by, create_time)
+        VALUES (#{channelId}, #{title}, #{slug}, #{summary}, #{coverUrl}, #{contentHtml},
+                #{source}, #{author}, #{status},
+                #{metaTitle}, #{metaDescription}, #{metaKeywords}, #{canonicalUrl},
+                #{publishedAt}, #{viewCount}, #{sortOrder},
+                #{createBy}, NOW())
+    </insert>
+
+    <update id="updateById" parameterType="com.scaffold.module.cms.domain.Article">
+        UPDATE cms_article
+        <set>
+            <if test="channelId != null">channel_id = #{channelId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="slug != null">slug = #{slug},</if>
+            <if test="summary != null">summary = #{summary},</if>
+            <if test="coverUrl != null">cover_url = #{coverUrl},</if>
+            <if test="contentHtml != null">content_html = #{contentHtml},</if>
+            <if test="source != null">source = #{source},</if>
+            <if test="author != null">author = #{author},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="metaTitle != null">meta_title = #{metaTitle},</if>
+            <if test="metaDescription != null">meta_description = #{metaDescription},</if>
+            <if test="metaKeywords != null">meta_keywords = #{metaKeywords},</if>
+            <if test="canonicalUrl != null">canonical_url = #{canonicalUrl},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="updateStatus">
+        UPDATE cms_article
+        <set>
+            status = #{status},
+            <if test="publishedAt != null">published_at = #{publishedAt},</if>
+            update_by = #{updateBy},
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="updateProcessInstanceId">
+        UPDATE cms_article
+        SET process_instance_id = #{processInstanceId}, update_time = NOW()
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="softDelete">
+        UPDATE cms_article
+        SET del_flag = '2', update_by = #{updateBy}, update_time = NOW()
+        WHERE id = #{id} AND del_flag = '0'
+    </update>
+
+    <update id="incrementViewCount" parameterType="long">
+        UPDATE cms_article SET view_count = view_count + 1
+        WHERE id = #{id} AND del_flag = '0' AND status = 'PUBLISHED'
+    </update>
+
+    <select id="countByChannelId" parameterType="long" resultType="int">
+        SELECT COUNT(1) FROM cms_article WHERE channel_id = #{channelId} AND del_flag = '0'
+    </select>
+
+    <!-- ===== article-tag 关联 ===== -->
+
+    <select id="selectArticleTagPairs" resultMap="articleTagPairMap">
+        SELECT article_id, tag_id FROM cms_article_tag
+        WHERE article_id IN
+        <foreach collection="articleIds" item="id" open="(" separator="," close=")">#{id}</foreach>
+    </select>
+
+    <select id="selectTagIdsByArticleId" parameterType="long" resultType="long">
+        SELECT tag_id FROM cms_article_tag WHERE article_id = #{articleId}
+    </select>
+
+    <delete id="deleteTagsByArticleId" parameterType="long">
+        DELETE FROM cms_article_tag WHERE article_id = #{articleId}
+    </delete>
+
+    <insert id="batchInsertTags">
+        INSERT INTO cms_article_tag (article_id, tag_id) VALUES
+        <foreach collection="tagIds" item="tagId" separator=",">(#{articleId}, #{tagId})</foreach>
+    </insert>
+
+</mapper>

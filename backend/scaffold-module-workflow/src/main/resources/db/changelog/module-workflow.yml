@@ -1,0 +1,85 @@
+databaseChangeLog:
+  - changeSet:
+      id: workflow-20260506-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 3001
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/workflow_menu.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: workflow-20260506-enhance-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 3023
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/workflow_menu_enhance.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: workflow-20260506-form-schema
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - not:
+            - tableExists:
+                tableName: wf_form_schema
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/workflow_form_schema.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: workflow-20260507-presign-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 3026
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/workflow_menu_presign.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
+
+  - changeSet:
+      id: workflow-20260507-instance-admin-menu
+      author: scaffold
+      preConditions:
+        - onFail: MARK_RAN
+        - onError: HALT
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(1) FROM sys_menu WHERE menu_id = 3027
+      changes:
+        - sqlFile:
+            path: db/changelog/sql/workflow_menu_instance_admin.sql
+            relativeToChangelogFile: false
+            splitStatements: true
+            stripComments: false
+            endDelimiter: ;
