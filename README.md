@@ -1,6 +1,6 @@
 ﻿# Fullstack Scaffold（开源版）
 
-> 一个通用前后端管理系统脚手架，开源版保留核心框架、系统管理、工作流、CMS、表单、文件、报表、可观测性等平台能力，可作为各类业务系统的基座。
+> 一个纯vibe coding(Claude Opuse4.7和GPT5.5)编写的通用前后端管理系统脚手架，开源版保留核心框架、系统管理、工作流、CMS、表单、文件、报表、可观测性等平台能力，可作为各类业务系统的基座。
 > 商业版额外提供 CRM、Ticket、PM、Inventory、OA 五个完整业务套件，见下方"商业版"章节。
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -22,6 +22,21 @@
 | 商业套件（需购买） | CRM / Ticket / PM / Inventory / OA，包含后端模块、inbox 桥、workflow 桥与前端页面 |
 
 完整功能清单见 [`docs/FEATURES.md`](./docs/FEATURES.md)；运维 / 部署 / 卸载手册见 [`docs/RUNBOOK.md`](./docs/RUNBOOK.md)；阶段路线图见 [`docs/ROADMAP.md`](./docs/ROADMAP.md)。
+
+### 功能截图预览
+
+| | |
+|---|---|
+| ![控制台概览](docs/images/features/dashboard-overview.png) | ![系统用户管理](docs/images/features/system-user.png) |
+| ![可观测性慢请求分析](docs/images/features/observability-slow-request.png) | ![工作流处理](docs/images/features/workflow-process.png) |
+| ![工作流表单设计器](docs/images/features/workflow-form-designer.png) | ![CMS文章管理](docs/images/features/cms-article.png) |
+| ![报表看板](docs/images/features/report-dashboard.png) | ![文件中心](docs/images/features/file-center.png) |
+| ![表单模板管理](docs/images/features/form-template.png) | ![工作流设计器](docs/images/features/workflow-designer.png) |
+| ![工作流待办](docs/images/features/workflow-todo.png) | ![工作流已办](docs/images/features/workflow-done.png) |
+| ![CMS栏目管理](docs/images/features/cms-channel.png) | ![CMS标签管理](docs/images/features/cms-tag.png) |
+| ![报表模板管理](docs/images/features/report-template.png) | ![报表数据源管理](docs/images/features/report-datasource.png) |
+| ![报表执行日志](docs/images/features/report-log.png) | ![文件分享](docs/images/features/file-share.png) |
+| ![表单提交记录](docs/images/features/form-submission.png) | |
 
 ## 🚀 5 分钟启动
 
